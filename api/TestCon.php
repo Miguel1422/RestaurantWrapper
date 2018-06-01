@@ -27,4 +27,6 @@ if (!empty($result)) {
         array_push($response["producto"], $product);
     }
     echo json_encode($response);
+} else {
+    echo "what";
 }
