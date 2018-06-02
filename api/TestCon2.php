@@ -34,5 +34,15 @@ if (!empty($result)) {
 } else {
     echo "what";
 }
-//sqlsrv_free_stmt($stmt);
+
 sqlsrv_close($conn);
+require_once 'include/DB_Functions.php';
+$test = new DB_Functions();
+
+$res = $test->getUserByEmailAndPassword('alberto', '123');
+if ($res) {
+    echo json_encode($res);
+} else {
+    echo "El usuario no existe";
+}
+//sqlsrv_free_stmt($stmt);
