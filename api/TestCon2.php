@@ -39,7 +39,7 @@ sqlsrv_close($conn);
 require_once 'include/DB_Functions.php';
 $test = new DB_Functions();
 
-$res = $test->getUserByEmailAndPassword('alberto', '123');
+$res = $test->getUserByUsernameAndPassword('alberto', '123');
 if ($res) {
     echo json_encode($res);
 } else {

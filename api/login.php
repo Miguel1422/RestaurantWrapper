@@ -7,22 +7,17 @@ $db = new DB_Functions();
 $response = array("error" => false);
 
 if (isset($_POST['username']) && isset($_POST['password'])) {
-
     // receiving the post params
     $email = $_POST['username'];
     $password = $_POST['password'];
 
     // get the user by email and password
-    $user = $db->getUserByEmailAndPassword($email, $password);
+    $user = $db->getUserByUsernameAndPassword($email, $password);
 
     if ($user != false) {
         // use is found
         $response["error"] = false;
-        $response["user"]["username"] = $user["username"];
-        $response["user"]["api_key"] = $user["api_key"];
-        $response["trabajador"]["nombre"] = $user["nombre"];
-        $response["trabajador"]["apellidos"] = $user["apellidos"];
-
+        $response["user"] = $user;
         $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
@@ -31,6 +26,21 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         $response["error_msg"] = "Login credentials are wrong. Please try again!";
         echo json_encode($response);
     }
+} else if (isset($_POST['api_key'])) {
+    $key = $_POST['api_key'];
+    $user = $db->getUserByApiKey($key);
+
+    if ($user != false) {
+        // use is found
+        $response["error"] = false;
+        $response["user"] = $user;
+        $response = array_map("encode_all_strings", $response);
+        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } else {
+        // user is not found with the credentials
+        print_err("Vuleve a introducir tus credenciales", $response);
+    }
+
 } else {
     // required post params is missing
     $response["error"] = true;

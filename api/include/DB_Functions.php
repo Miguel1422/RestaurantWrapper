@@ -50,7 +50,7 @@ class DB_Functions
     /**
      * Get user by email and password
      */
-    public function getUserByEmailAndPassword($username, $password)
+    public function getUserByUsernameAndPassword($username, $password)
     {
         $stmt = sqlsrv_prepare($this->conn,
             "SELECT * FROM [User] AS u " .
@@ -71,7 +71,8 @@ class DB_Functions
         $salt = $user['salt'];
         $encrypted_password = $user['hash'];
         $hash = $this->checkhashSSHA($salt, $password);
-        $uuid = uniqid('', true);
+        $uuid = /*md5*/
+            (uniqid('', true));
 
         // Una vez logueado crear una api key para la sesion y todas las seesiones posteriores o hasta un nuevo logueo
         $user["api_key"] = $uuid;
@@ -85,6 +86,27 @@ class DB_Functions
         }
     }
 
+    public function getUserByApiKey($api_key)
+    {
+        $stmt = sqlsrv_prepare($this->conn,
+            "SELECT * FROM [User] AS u " .
+            "INNER JOIN Trabajador AS t " .
+            "ON u.id_trabajador = t.id_trabajador " .
+            "WHERE u.api_key = ?"
+            , array($api_key));
+        $result = sqlsrv_execute($stmt);
+
+        if (!$result) {
+            return null;
+        }
+
+        $user = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        sqlsrv_free_stmt($stmt);
+        // check for password equality
+        // user authentication details are correct
+        return $user;
+
+    }
 
     public function getOrden($id_mesa)
     {
@@ -96,7 +118,7 @@ class DB_Functions
         }
         $orden = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
 
-        if(!$orden) {
+        if (!$orden) {
             return false;
         }
         $orden["pedidos"] = array();
@@ -107,12 +129,61 @@ class DB_Functions
             sqlsrv_free_stmt($stmt);
             return false;
         }
-        while($pedido = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+        while ($pedido = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
             // $pedido["variantes"]
             array_push($orden["pedidos"], $pedido);
         }
 
         return $orden;
+    }
+
+    public function agregarOrden($id_mesa, $api_key)
+    {
+        $trabajador = $this->getUserByApiKey($api_key);
+
+        $stmt = sqlsrv_prepare($this->conn, "INSERT INTO Orden (id_mesa, id_trabajador) VALUES (?, ?)", array($id_mesa, $trabajador["id_trabajador"]));
+        $result = sqlsrv_execute($stmt);
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        return $this->getOrden($id_mesa);
+    }
+
+    public function agregarPedido($id_orden, $id_tipo_producto, $id_variantes, $cantidad, $comentarios)
+    {
+        $variantes = "";
+        foreach ($id_variantes as $variante) {
+            $variantes .= trim($variante);
+        }
+        $stmt = sqlsrv_prepare($this->conn, "EXECUTE agregarOrdenProducto @IDOrden = ?, @IDTipoProducto = ?, @IDVariantes = ?, @Cantidad = ?, @Comentarios = ?",
+            array($id_orden, $id_tipo_producto, $variantes, $cantidad, $comentarios));
+
+        $result = sqlsrv_execute($stmt);
+        sqlsrv_free_stmt($stmt);
+        return $result;
+    }
+
+    public function editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios)
+    {
+        $variantes = "";
+        foreach ($id_variantes as $variante) {
+            $variantes .= trim($variante);
+        }
+        $stmt = sqlsrv_prepare($this->conn, "EXECUTE editarOrdenProducto @IDOrdenProducto = ?, @IDTipoProducto = ?, @IDVariantes = ?, @Cantidad = ?, @Comentarios = ?",
+            array($id_orden_producto, $id_tipo_producto, $variantes, $cantidad, $comentarios));
+
+        $result = sqlsrv_execute($stmt);
+        sqlsrv_free_stmt($stmt);
+        return $result;
+    }
+
+    public function eliminarPedido($id_orden_producto)
+    {
+        $stmt = sqlsrv_prepare($this->conn, "DELETE FROM OrdenProducto WHERE id_orden_producto = ?", array($id_orden_producto));
+        $result = sqlsrv_execute($stmt);
+        sqlsrv_free_stmt($stmt);
+        return $result;
     }
 
     public function getMesas($api_key)
@@ -134,6 +205,77 @@ class DB_Functions
         }
         sqlsrv_free_stmt($stmt);
         return $mesas;
+    }
+
+    public function getProductos()
+    {
+        $query = "SELECT * FROM Producto AS P " .
+            "INNER JOIN CategoriaProducto AS CP " .
+            "ON P.id_categoria = CP.id_categoria " .
+            "ORDER BY CP.nombre_categoria, P.nombre_producto";
+
+        $stmt = sqlsrv_prepare($this->conn, $query);
+        $result = sqlsrv_execute($stmt);
+
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        $productos = array();
+        while ($producto = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            $producto["tipos"] = $this->getTipos($producto["id_producto"]);
+            array_push($productos, $producto);
+        }
+        sqlsrv_free_stmt($stmt);
+        return $productos;
+    }
+
+    public function getProductoImagen($id_producto)
+    {
+        $query = "SELECT * FROM ProductoImagen WHERE id_imagen = ?";
+
+        $stmt = sqlsrv_prepare($this->conn, $query, array($id_producto));
+        $result = sqlsrv_execute($stmt);
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        $image = $result["imagen"];
+        return $image;
+    }
+    public function getTrabajadorImagen($id_trabajador)
+    {
+        $query = "SELECT * FROM TrabajadorImagen WHERE id_trabajador = ?";
+
+        $stmt = sqlsrv_prepare($this->conn, $query, array($id_trabajador));
+        $result = sqlsrv_execute($stmt);
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        $image = $result["imagen"];
+        return $image;
+    }
+
+    public function getTipos($id_producto)
+    {
+        $query = "EXECUTE getTipoProductos @IDProducto = ?";
+
+        $stmt = sqlsrv_prepare($this->conn, $query, array($id_producto));
+        $result = sqlsrv_execute($stmt);
+
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        $tipos = array();
+        while ($tipo = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+            array_push($tipos, $tipo);
+        }
+        sqlsrv_free_stmt($stmt);
+        return $tipos;
     }
 
     public function isValidApiKey($api_key)
@@ -199,5 +341,6 @@ class DB_Functions
         $hash = sha1($hex . $password . $hex, true);
         return $hash;
     }
+
 
 }
