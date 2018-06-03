@@ -6,29 +6,22 @@ $db = new DB_Functions();
 // json response array
 $response = array("error" => false);
 
-
 if (isset($_POST['api_key'])) {
+
     if (!isset($_GET['id_producto'])) {
-        print_err("No se tiene el producto", $response);
+        print_err('No se ha ingresado el producto', $response);
     }
     // receiving the post params
     $key = $_POST['api_key'];
     $id_producto = $_GET['id_producto'];
-    // get the user by email and password
-    if ($db->isValidApiKey($key)) {
-        $response["image"] = $db->getProductoImagen($id_producto);
-        if (!$response["image"]) {
-            print_err("No existe esa imagen", $response);
-        }
 
-        /*header('Content-Type: image/png');
-        $data = $response['image'];
-        $im = imagecreatefromstring($data);
-        imagejpeg($im);
-        imagedestroy($im);
-        */
-        $response['image'] = base64_encode($response['image']);
-        echo json_encode($response);
+    if ($db->isValidApiKey($key)) {
+        $response["tipos"] = $db->getTipos($id_producto);
+        if (!$response["tipos"]) {
+            print_err("No se pudieron recuperar los tipos", $response);
+        }
+        $response = array_map("encode_all_strings", $response);
+        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     } else {
         print_err("Error informacion desactualizada, logueate de nuevo!", $response);

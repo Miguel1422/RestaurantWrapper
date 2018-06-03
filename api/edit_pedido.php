@@ -8,18 +8,18 @@ $response = array("error" => false);
 
 
 if (isset($_POST['api_key'])) {
-    if (!isset($_GET['id_orden_producto']) || !isset($_GET['id_tipo_producto']) || !isset($_GET['id_variantes']) || !isset($_GET['cantidad']) || !isset($_GET['comentarios'])) {
+    if (!isset($_POST['id_orden_producto']) || !isset($_POST['id_tipo_producto']) || !isset($_POST['id_variantes']) || !isset($_POST['cantidad']) || !isset($_POST['comentarios'])) {
         print_err("Hacen falta datos", $response);
     }
     // receiving the post params
     $key = $_POST['api_key'];
 
     // receiving the get params
-    $id_orden_producto = $_GET['id_orden_producto'];
-    $id_tipo_producto = $_GET['id_tipo_producto'];
-    $id_variantes = explode("|", $_GET['id_variantes']);
-    $cantidad = $_GET['cantidad'];
-    $comentarios = $_GET['comentarios'];
+    $id_orden_producto = $_POST['id_orden_producto'];
+    $id_tipo_producto = $_POST['id_tipo_producto'];
+    $id_variantes = explode("|", $_POST['id_variantes']);
+    $cantidad = $_POST['cantidad'];
+    $comentarios = $_POST['comentarios'];
 
     // get the user by email and password
     if ($db->isValidApiKey($key)) {
