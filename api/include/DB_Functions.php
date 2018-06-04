@@ -71,8 +71,7 @@ class DB_Functions
         $salt = $user['salt'];
         $encrypted_password = $user['hash'];
         $hash = $this->checkhashSSHA($salt, $password);
-        $uuid = /*md5*/
-            (uniqid('', true));
+        $uuid = md5(uniqid('', true));
 
         // Una vez logueado crear una api key para la sesion y todas las seesiones posteriores o hasta un nuevo logueo
         $user["api_key"] = $uuid;
