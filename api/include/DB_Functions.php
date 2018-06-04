@@ -244,6 +244,7 @@ class DB_Functions
         $image = $result["imagen"];
         return $image;
     }
+
     public function getTrabajadorImagen($id_trabajador)
     {
         $query = "SELECT * FROM TrabajadorImagen WHERE id_trabajador = ?";

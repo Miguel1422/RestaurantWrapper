@@ -20,7 +20,7 @@ if (isset($_POST['api_key'])) {
         if (!$response["tipos"]) {
             print_err("No se pudieron recuperar los tipos", $response);
         }
-        $response = array_map("encode_all_strings", $response);
+        // $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     } else {

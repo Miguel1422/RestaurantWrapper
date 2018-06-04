@@ -1,5 +1,4 @@
 <?php
-
 /**
  * A class file to connect to database
  */
@@ -29,8 +28,9 @@ class DB_CONNECT
         require_once __DIR__ . '/db_config.php';
 
         // Connect to sql server using windows authentication
-        $connectionInfo = array("Database" => DB_DATABASE);
+        $connectionInfo = array("Database" => DB_DATABASE, "CharacterSet" => "UTF-8");
         $conn = sqlsrv_connect(DB_SERVER, $connectionInfo);
+        // $conn = new PDO("sqlsrv:Server=localhost;Database=Restaurant");
 
         if (!$conn) {
             die(print_r(sqlsrv_errors(), true));

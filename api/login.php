@@ -18,7 +18,9 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         // use is found
         $response["error"] = false;
         $response["user"] = $user;
-        $response = array_map("encode_all_strings", $response);
+        unset($response["user"]["hash"]);
+        unset($response["user"]["salt"]);
+        // $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
         // user is not found with the credentials
@@ -34,7 +36,9 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
         // use is found
         $response["error"] = false;
         $response["user"] = $user;
-        $response = array_map("encode_all_strings", $response);
+        unset($response["user"]["hash"]);
+        unset($response["user"]["salt"]);
+        // $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
         // user is not found with the credentials

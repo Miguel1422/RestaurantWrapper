@@ -20,7 +20,7 @@ if (isset($_POST['api_key'])) {
         if(!$response["orden"]) {
             print_err("No se pudo crear la orden", $response);
         }
-        $response = array_map("encode_all_strings", $response);
+        // $response = array_map("encode_all_strings", $response);
         $response["orden"]["fecha"] = $response["orden"]["fecha"]->setTimezone(new DateTimeZone('America/Mexico_City'));
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 

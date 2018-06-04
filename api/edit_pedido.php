@@ -27,7 +27,7 @@ if (isset($_POST['api_key'])) {
         if (!$response["pedido_agregado"]) {
             print_err("No se pudo editar la orden, asegurate de estar conectado a la DB", $response);
         }
-        $response = array_map("encode_all_strings", $response);
+        // $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
     } else {
