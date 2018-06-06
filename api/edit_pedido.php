@@ -8,7 +8,7 @@ $response = array("error" => false);
 
 
 if (isset($_POST['api_key'])) {
-    if (!isset($_POST['id_orden_producto']) || !isset($_POST['id_tipo_producto']) || !isset($_POST['id_variantes']) || !isset($_POST['cantidad']) || !isset($_POST['comentarios'])) {
+    if (!isset($_POST['id_orden_producto']) || !isset($_POST['id_tipo_producto']) || !isset($_POST['id_variantes']) || !isset($_POST['cantidad']) || !isset($_POST['comentarios']) || !isset($_POST['status'])) {
         print_err("Hacen falta datos", $response);
     }
     // receiving the post params
@@ -20,10 +20,12 @@ if (isset($_POST['api_key'])) {
     $id_variantes = explode("|", $_POST['id_variantes']);
     $cantidad = $_POST['cantidad'];
     $comentarios = $_POST['comentarios'];
+    $status = $_POST['status'];
+
 
     // get the user by email and password
     if ($db->isValidApiKey($key)) {
-        $response["pedido_agregado"] = $db->editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios);
+        $response["pedido_agregado"] = $db->editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios, $status);
         if (!$response["pedido_agregado"]) {
             print_err("No se pudo editar la orden, asegurate de estar conectado a la DB", $response);
         }

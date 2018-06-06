@@ -160,12 +160,12 @@ class DB_Functions
 
         $result = sqlsrv_execute($stmt);
         sqlsrv_free_stmt($stmt);
-        if(!$result) {
+        if (!$result) {
             return false;
         }
         $stmt = sqlsrv_prepare($this->conn, "SELECT IDENT_CURRENT('OrdenProducto')"); // Obtiene el id del prodcucto agregado
         $result = sqlsrv_execute($stmt);
-        if(!$result) {
+        if (!$result) {
             return false;
         }
         $id_orden_producto = sqlsrv_fetch_array($stmt)[0];
@@ -175,11 +175,12 @@ class DB_Functions
         return $result;
     }
 
-    public function getOrdenProducto($id_orden_producto) {
+    public function getOrdenProducto($id_orden_producto)
+    {
         $stmt = sqlsrv_prepare($this->conn, "SELECT * FROM OrdenProducto AS OP INNER JOIN TipoProducto TP ON OP.id_tipo_producto = TP.id_tipo_producto INNER JOIN Producto P ON TP.id_producto = P.id_producto INNER JOIN CategoriaProducto AS C ON P.id_categoria = C.id_categoria WHERE id_orden_producto = ?", array($id_orden_producto));
 
         $result = sqlsrv_execute($stmt);
-        if(!$result) {
+        if (!$result) {
             return false;
         }
         $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
@@ -188,14 +189,15 @@ class DB_Functions
         $result['variantes'] = "";
         return $result;
     }
-    public function editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios)
+
+    public function editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios, $status)
     {
         $variantes = "";
         foreach ($id_variantes as $variante) {
             $variantes .= trim($variante);
         }
-        $stmt = sqlsrv_prepare($this->conn, "EXECUTE editarOrdenProducto @IDOrdenProducto = ?, @IDTipoProducto = ?, @IDVariantes = ?, @Cantidad = ?, @Comentarios = ?",
-            array($id_orden_producto, $id_tipo_producto, $variantes, $cantidad, $comentarios));
+        $stmt = sqlsrv_prepare($this->conn, "EXECUTE editarOrdenProducto @IDOrdenProducto = ?, @IDTipoProducto = ?, @IDVariantes = ?, @Cantidad = ?, @Comentarios = ?, @Status = ?",
+            array($id_orden_producto, $id_tipo_producto, $variantes, $cantidad, $comentarios, $status));
 
         $result = sqlsrv_execute($stmt);
         sqlsrv_free_stmt($stmt);
