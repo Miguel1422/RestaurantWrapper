@@ -160,9 +160,34 @@ class DB_Functions
 
         $result = sqlsrv_execute($stmt);
         sqlsrv_free_stmt($stmt);
+        if(!$result) {
+            return false;
+        }
+        $stmt = sqlsrv_prepare($this->conn, "SELECT IDENT_CURRENT('OrdenProducto')"); // Obtiene el id del prodcucto agregado
+        $result = sqlsrv_execute($stmt);
+        if(!$result) {
+            return false;
+        }
+        $id_orden_producto = sqlsrv_fetch_array($stmt)[0];
+
+        $result = $this->getOrdenProducto($id_orden_producto);
+
         return $result;
     }
 
+    public function getOrdenProducto($id_orden_producto) {
+        $stmt = sqlsrv_prepare($this->conn, "SELECT * FROM OrdenProducto AS OP INNER JOIN TipoProducto TP ON OP.id_tipo_producto = TP.id_tipo_producto INNER JOIN Producto P ON TP.id_producto = P.id_producto INNER JOIN CategoriaProducto AS C ON P.id_categoria = C.id_categoria WHERE id_orden_producto = ?", array($id_orden_producto));
+
+        $result = sqlsrv_execute($stmt);
+        if(!$result) {
+            return false;
+        }
+        $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+
+        sqlsrv_free_stmt($stmt);
+        $result['variantes'] = "";
+        return $result;
+    }
     public function editarPedido($id_orden_producto, $id_tipo_producto, $id_variantes, $cantidad, $comentarios)
     {
         $variantes = "";
