@@ -9,14 +9,14 @@ class DB_CONNECT
     public function __construct()
     {
         // connecting to database
-        $this->connect();
+        // $this->connect();
     }
 
     // destructor
     public function __destruct()
     {
         // closing db connection
-        $this->close();
+//         $this->close();
     }
 
     /**
@@ -37,16 +37,20 @@ class DB_CONNECT
         }
 
         // returing connection cursor
+        // $this->conn = $conn;
         return $conn;
     }
 
     /**
      * Function to close db connection
      */
-    public function close()
+    public function close($conn)
     {
         // closing db connection
-        // sqlsrv_close($this->conn);
+        $closed = sqlsrv_close($conn);
+        if(!$closed) {
+            die("No se pudo cerrar");
+        }
     }
 
 }

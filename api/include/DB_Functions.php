@@ -44,7 +44,8 @@ class DB_Functions
     // destructor
     public function __destruct()
     {
-
+        $db = new DB_CONNECT();
+        $db->close($this->conn);
     }
 
     /**
