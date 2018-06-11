@@ -17,7 +17,7 @@ class DB_CONNECT
     {
         // closing db connection
 //         $this->close();
-    }
+}
 
     /**
      * Function to connect with database
@@ -47,10 +47,10 @@ class DB_CONNECT
     public function close($conn)
     {
         // closing db connection
-        $closed = sqlsrv_close($conn);
+        /*$closed = sqlsrv_close($conn);
         if(!$closed) {
             die("No se pudo cerrar");
-        }
+        }*/
     }
 
 }

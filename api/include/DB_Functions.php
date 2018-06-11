@@ -315,7 +315,7 @@ class DB_Functions
         }
         $asd = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
         sqlsrv_free_stmt($stmt);
-        return count($asd) > 0;
+        return is_array($asd) && count($asd) > 0;
     }
 
     public function updateApiKey($username, $uuid)
