@@ -25,7 +25,7 @@ if (isset($_POST['username']) && isset($_POST['password'])) {
     } else {
         // user is not found with the credentials
         $response["error"] = true;
-        $response["error_msg"] = "Login credentials are wrong. Please try again!";
+        $response["error_msg"] = "Creddenciales incorrectas, Intentalo de nuevo!";
         echo json_encode($response);
     }
 } else if (isset($_POST['api_key'])) {
