@@ -205,6 +205,16 @@ class DB_Functions
         return $result;
     }
 
+    public function editarPedidoStatus($id_orden_producto, $status)
+    {
+        $stmt = sqlsrv_prepare($this->conn, "UPDATE OrdenProducto SET [status] = ? WHERE id_orden_producto = ?",
+            array($status, $id_orden_producto));
+
+        $result = sqlsrv_execute($stmt);
+        sqlsrv_free_stmt($stmt);
+        return $result;
+    }
+
     public function eliminarPedido($id_orden_producto)
     {
         $stmt = sqlsrv_prepare($this->conn, "DELETE FROM OrdenProducto WHERE id_orden_producto = ?", array($id_orden_producto));
@@ -369,6 +379,9 @@ class DB_Functions
         $hash = sha1($hex . $password . $hex, true);
         return $hash;
     }
+
+
+
 
 
 }
