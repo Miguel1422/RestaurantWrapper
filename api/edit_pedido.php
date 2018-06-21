@@ -8,7 +8,7 @@ $response = array("error" => false);
 
 
 if (isset($_POST['api_key'])) {
-    if (!isset($_POST['id_orden']) || !isset($_POST['id_orden_producto']) || !isset($_POST['id_tipo_producto']) || !isset($_POST['id_variantes']) || !isset($_POST['cantidad']) || !isset($_POST['comentarios']) || !isset($_POST['status'])) {
+    if (!isset($_POST['id_orden']) || !isset($_POST['id_orden_producto']) || !isset($_POST['id_tipo_producto']) || !isset($_POST['id_variantes']) || !isset($_POST['cantidad']) || !isset($_POST['comentarios']) || !isset($_POST['status']) || !isset($_POST['uid'])) {
         print_err("Hacen falta datos", $response);
     }
     // receiving the post params
@@ -21,21 +21,31 @@ if (isset($_POST['api_key'])) {
     $id_orden = $_POST['id_orden'];
     $cantidad = $_POST['cantidad'];
     $comentarios = $_POST['comentarios'];
+    $uid = $_POST['uid'];
     $status = $_POST['status'];
 
     if ($db->isValidApiKey($key)) {
-        $response["ordenEliminada"] = $db->eliminarPedido($id_orden_producto);
-        if (!$response["ordenEliminada"]) {
-            print_err("No se pudo eliminar la orden", $response);
+
+        if ($db->isVerificadorInserted($uid)) {
+            $response["pedido_agregado"] = $db->getPedidoByVerificador($uid);
+            if (!$response["pedido_agregado"]) {
+                print_err("Se creo la orden pero no se pudo recuperar", $response);
+            }
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        } else {
+            $response["ordenEliminada"] = $db->eliminarPedido($id_orden_producto);
+            if (!$response["ordenEliminada"]) {
+                print_err("No se pudo eliminar la orden", $response);
+            }
+
+
+            $response["pedido_agregado"] = $db->agregarPedido($id_orden, $id_tipo_producto, $id_variantes, $cantidad, $comentarios, $uid);
+            if (!$response["pedido_agregado"]) {
+                print_err("No se pudo crear la orden", $response);
+            }
+
+            echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         }
-
-        $response["pedido_agregado"] = $db->agregarPedido($id_orden, $id_tipo_producto, $id_variantes, $cantidad, $comentarios);
-        if (!$response["pedido_agregado"]) {
-            print_err("No se pudo crear la orden", $response);
-        }
-
-        echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
     } else {
         print_err("Error informacion desactualizada, logueate de nuevo!", $response);
     }
