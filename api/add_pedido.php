@@ -25,6 +25,9 @@ if (isset($_POST['api_key'])) {
 
         if($db->isVerificadorInserted($uid)) {
             $response["pedido_agregado"] = $db->getPedidoByVerificador($uid);
+            if (!$response["pedido_agregado"]) {
+                print_err("Se creo la orden pero no se pudo recuperar", $response);
+            }
             echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         } else {
 
