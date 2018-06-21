@@ -15,6 +15,22 @@ if (isset($_POST['api_key'])) {
         if(!$response["productos"]) {
             print_err("No se pudieron recuperar los productos", $response);
         }
+
+
+        $temp_array = array();
+        foreach ($response["productos"] as $producto) {
+            array_push($temp_array, $producto);
+        }
+        usort($temp_array, function($a, $b)
+        {
+            return strcmp($a["nombre_producto"], $b["nombre_producto"]);
+        });
+        foreach ($temp_array as $producto) {
+            $producto["id_categoria"] = -1;
+            $producto["nombre_categoria"] = "Todas";
+            array_push($response["productos"], $producto);
+        }
+
         // $response = array_map("encode_all_strings", $response);
         echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 

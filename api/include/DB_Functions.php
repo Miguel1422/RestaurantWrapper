@@ -150,7 +150,23 @@ class DB_Functions
         return $this->getOrden($id_mesa);
     }
 
-    public function agregarPedido($id_orden, $id_tipo_producto, $id_variantes, $cantidad, $comentarios)
+    public function getPedidoByVerificador($verificador)
+    {
+        $stmt = sqlsrv_prepare($this->conn, "SELECT * FROM OrdenProducto WHERE verificador = ?",
+            array($verificador));
+
+        $result = sqlsrv_execute($stmt);
+
+        if (!$result) {
+            sqlsrv_free_stmt($stmt);
+            return false;
+        }
+        $result = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        sqlsrv_free_stmt($stmt);
+        return $result;
+    }
+
+    public function agregarPedido($id_orden, $id_tipo_producto, $id_variantes, $cantidad, $comentarios, $uid)
     {
         $variantes = "";
         foreach ($id_variantes as $variante) {
@@ -171,8 +187,23 @@ class DB_Functions
         }
         $id_orden_producto = sqlsrv_fetch_array($stmt)[0];
 
+        $result = $this->editarPedidoVerificador($id_orden_producto, $uid);
+        if(!$result) {
+            return false;
+        }
+
         $result = $this->getOrdenProducto($id_orden_producto);
 
+        return $result;
+    }
+
+    public function editarPedidoVerificador($id_orden_producto, $uid)
+    {
+        $stmt = sqlsrv_prepare($this->conn, "UPDATE OrdenProducto SET [verificador] = ? WHERE id_orden_producto = ?",
+            array($uid, $id_orden_producto));
+
+        $result = sqlsrv_execute($stmt);
+        sqlsrv_free_stmt($stmt);
         return $result;
     }
 
@@ -328,6 +359,18 @@ class DB_Functions
         return is_array($asd) && count($asd) > 0;
     }
 
+    public function isVerificadorInserted($verificador)
+    {
+        $stmt = sqlsrv_prepare($this->conn, "SELECT id_orden from [OrdenProducto] WHERE verificador = ?", array($verificador));
+        $result = sqlsrv_execute($stmt);
+        if (!$result) {
+            return false;
+        }
+        $asd = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC);
+        sqlsrv_free_stmt($stmt);
+        return is_array($asd) && count($asd) > 0;
+    }
+
     public function updateApiKey($username, $uuid)
     {
         $stmt = sqlsrv_prepare($this->conn,
@@ -379,9 +422,6 @@ class DB_Functions
         $hash = sha1($hex . $password . $hex, true);
         return $hash;
     }
-
-
-
 
 
 }
